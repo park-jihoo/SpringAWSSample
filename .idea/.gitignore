@@ -8,3 +8,6 @@
 /httpRequests/
 # Zeppelin ignored files
 /ZeppelinRemoteNotebooks/
+/aws.xml
+/runConfigurations.xml
+/vcs.xml
