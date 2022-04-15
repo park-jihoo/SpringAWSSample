@@ -11,3 +11,6 @@
 /aws.xml
 /runConfigurations.xml
 /vcs.xml
+/compiler.xml
+/gradle.xml
+/misc.xml
