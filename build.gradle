@@ -27,16 +27,21 @@ repositories {
 
 //의존성 내려받기
 dependencies {
+    //implementation: a모듈을 수정하게 되면 직접적으로 의존하는 모듈까지만 rebuild함
+    //annotationprocessor: annotation processor 명시
+    //runtimeonly: runtime시에만 필요한 library
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.projectlombok:lombok')
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     annotationProcessor('org.projectlombok:lombok')
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
     implementation('com.h2database:h2')
 
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testAnnotationProcessor('org.projectlombok:lombok')
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.7.0')
     testImplementation('org.projectlombok:lombok')
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    testImplementation('com.h2pdatabase:h2')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.7.0')
 }
 
