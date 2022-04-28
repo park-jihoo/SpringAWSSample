@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor //생성자로 Bean 객체를 주입받는 방법이 Autowired와 같은데, 이 때 생성자가 여기서 해결됨
 @Service
 public class PostsService {
     private final PostsRepository postsRepository;

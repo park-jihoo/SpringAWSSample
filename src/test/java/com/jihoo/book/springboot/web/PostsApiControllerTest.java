@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class PostsApiControllerTest {
+    //WebMvcTest를 사용하지 않는 이유 -> WebMVcTest는 JPA기능이 작동하지 않음
     @LocalServerPort
     private int port;
 
