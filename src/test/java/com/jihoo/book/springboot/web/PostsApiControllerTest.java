@@ -43,12 +43,16 @@ class PostsApiControllerTest {
     public void post_post() throws Exception {
         String title = "title";
         String content = "content";
+
+        //수정할 데이터 build
         PostsSaveRequestDto requestDto = PostsSaveRequestDto
                 .builder()
                 .title(title)
                 .content(content)
                 .author("author")
                 .build();
+
+        //접속 url
         String url = "http://localhost:" + port + "/api/v1/posts";
         try{
             //when
@@ -69,6 +73,8 @@ class PostsApiControllerTest {
 
     @Test
     public void modify_post() throws Exception {
+
+        //확인할 Entity
         Posts savedPosts = postsRepository.save(Posts.builder()
                 .title("title")
                 .content("content")
@@ -78,6 +84,7 @@ class PostsApiControllerTest {
         String expectedTitle = "title2";
         String expectedContent = "content2";
 
+        //업데이트할 DTO
         PostsUpdateRequestDto requestDto = PostsUpdateRequestDto.builder()
                 .title(expectedTitle)
                 .content(expectedContent)
@@ -85,14 +92,18 @@ class PostsApiControllerTest {
 
         String url = "http://localhost:"+port+"/api/v1/posts/"+updateId;
 
+        //Request로 보낼 것
         HttpEntity<PostsUpdateRequestDto> requestEntity = new HttpEntity<>(requestDto);
 
         try{
+            //Response 확인
             ResponseEntity<Long> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Long.class);
 
+            //http 연결이 제대로 되었는지 확인
             assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(responseEntity.getBody()).isGreaterThan(0L);
 
+            //response로 업데이트된 DTO가 맞는지 확인
             List<Posts> all = postsRepository.findAll();
             assertThat(all.get(0).getTitle()).isEqualTo(expectedTitle);
             assertThat(all.get(0).getContent()).isEqualTo(expectedContent);
