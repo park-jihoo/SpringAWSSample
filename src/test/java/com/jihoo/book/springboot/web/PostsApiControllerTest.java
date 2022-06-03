@@ -1,9 +1,11 @@
 package com.jihoo.book.springboot.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jihoo.book.springboot.domain.posts.Posts;
 import com.jihoo.book.springboot.domain.posts.PostsRepository;
 import com.jihoo.book.springboot.web.dto.PostsSaveRequestDto;
 import com.jihoo.book.springboot.web.dto.PostsUpdateRequestDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,16 +17,36 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class PostsApiControllerTest {
+public class PostsApiControllerTest {
     //WebMvcTest를 사용하지 않는 이유 -> WebMVcTest는 JPA기능이 작동하지 않음
+    @Autowired
+    private WebApplicationContext context;
+    private MockMvc mvc;
+
+    @BeforeEach
+    public void setup(){
+        mvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
+    }
+
     @LocalServerPort
     private int port;
 
@@ -40,6 +62,7 @@ class PostsApiControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     public void post_post() throws Exception {
         String title = "title";
         String content = "content";
@@ -54,24 +77,22 @@ class PostsApiControllerTest {
 
         //접속 url
         String url = "http://localhost:" + port + "/api/v1/posts";
-        try{
-            //when
-            ResponseEntity<Long> responseEntity = restTemplate.postForEntity(url, requestDto, Long.class);
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isGreaterThan(0L);
-            List<Posts> all = postsRepository.findAll();
-            assertThat(all.get(0).getTitle()).isEqualTo(title);
-            assertThat(all.get(0).getContent()).isEqualTo(content);
+        //when
+        mvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(requestDto)))
+                .andExpect(status().isOk());
 
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
+        //then
+        List<Posts> all = postsRepository.findAll();
+        assertThat(all.get(0).getTitle()).isEqualTo(title);
+        assertThat(all.get(0).getContent()).isEqualTo(content);
 
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     public void modify_post() throws Exception {
 
         //확인할 Entity
@@ -95,21 +116,15 @@ class PostsApiControllerTest {
         //Request로 보낼 것
         HttpEntity<PostsUpdateRequestDto> requestEntity = new HttpEntity<>(requestDto);
 
-        try{
-            //Response 확인
-            ResponseEntity<Long> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Long.class);
+        //when
+        mvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(requestDto)))
+                .andExpect(status().isOk());
 
-            //http 연결이 제대로 되었는지 확인
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody()).isGreaterThan(0L);
-
-            //response로 업데이트된 DTO가 맞는지 확인
-            List<Posts> all = postsRepository.findAll();
-            assertThat(all.get(0).getTitle()).isEqualTo(expectedTitle);
-            assertThat(all.get(0).getContent()).isEqualTo(expectedContent);
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+        //then
+        List<Posts> all = postsRepository.findAll();
+        assertThat(all.get(0).getTitle()).isEqualTo(expectedTitle);
+        assertThat(all.get(0).getContent()).isEqualTo(expectedContent);
     }
 }
