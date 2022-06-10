@@ -5,6 +5,7 @@ import com.jihoo.book.springboot.config.auth.dto.SessionUser;
 import com.jihoo.book.springboot.service.PostsService;
 import com.jihoo.book.springboot.web.dto.PostsResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.h2.engine.Session;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import javax.servlet.http.HttpSession;
 
 @RequiredArgsConstructor
+@Slf4j
 @Controller
 public class IndexController {
     private final PostsService postsService;
@@ -22,15 +24,17 @@ public class IndexController {
     @GetMapping("/")
     public String index(Model model, @LoginUser SessionUser user){
         model.addAttribute("posts", postsService.findAllDesc());
-
         if (user != null){
-            model.addAttribute("userName", user.getName());
+            model.addAttribute("loginName", user.getName());
         }
         return "index";
     }
 
     @GetMapping("/posts/save")
-    public String postsSave(){
+    public String postsSave(Model model, @LoginUser SessionUser user){
+        if(user != null){
+            model.addAttribute("loginName", user.getName());
+        }
         return "posts-save";
     }
 
